@@ -20,4 +20,8 @@ export class AppController {
     return users[index];
   }
 
+  @Get('/without-ro')
+  getAllUsersWithoutRO(): any[] {
+    return this.appService.findAll();
+  }
 }

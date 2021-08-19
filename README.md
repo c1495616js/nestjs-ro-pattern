@@ -2,72 +2,134 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-  
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Nest.js RO Pattern
 
-## Description
+### Context
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+We've been using the RO for longer time,
 
-## Installation
+I'm obeserving 3 things bothering me(as developer is lazy...):
+- have to write `[key]: this[key]` many times if there are many properties in the `Entity`.
+- need a `map` to iterate `Entity[]` and calling `toResponseObject()`.
+- Furthermore, for `1-to-many` relationship, for example, user has many articles, then need to add `map` in `toResponseObject` too.
 
-```bash
-$ npm install
+```ts
+class UserRO {
+  id: number;
+  email: string;
+  articles?: ArticleRO[]
+  ...
+}
+
+class UserEntity {
+  id: number;
+  email: string;
+  password: string;
+
+  @OneToMany()
+  articles?: Article[]
+  ...
+
+  toResponseObject() {
+    return {
+      id: this.id,
+      email: this.email,
+
+      articles: this.articles.map(a => a.toResponseObject()),
+      ...
+    }
+  }
+}
+
+class UserService {
+  ...
+
+  async findAll(): Promise<UserRO[]> {
+    return users.map(u => u.toResponseObject());
+  }
+}
 ```
 
-## Running the app
 
-```bash
-# development
-$ npm run start
+### Solutions
 
-# watch mode
-$ npm run start:dev
+I found by using `class-transformer` and `interceptors` would have more elegant approach.
 
-# production mode
-$ npm run start:prod
+- No more `map`, and no more `toResponseObject`.
+
+Notice: `user.dto.ts` is equal to `UserRO`, `article.dto.ts` is equal to `ArticleRO`.
+
+On the `controller` level, we can simply either add `@Serialize(UserDto)` on class level or method level.
+Then everything is working fine as expected.
+
+#### Method Level
+```ts
+import { UserDto } from './dto/user.dto';
+import { Serialize } from './interceptors/serialize.interceptor';
+
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}
+
+  @Get()
+  @Serialize(UserDto)
+  getAllUsers(): UserDto[] {
+    return this.appService.findAll();
+  }
+
+  @Get('/:index')
+  getOneUser(@Param('index') index: number): UserDto {
+    const users = this.appService.findAll();
+    return users[index];
+  }
+}
+
+
 ```
 
-## Test
+#### Class Level
+```ts
+import { UserDto } from './dto/user.dto';
+import { Serialize } from './interceptors/serialize.interceptor';
 
-```bash
-# unit tests
-$ npm run test
+@Controller()
+@Serialize(UserDto)
+export class AppController {
+  constructor(private readonly appService: AppService) {}
 
-# e2e tests
-$ npm run test:e2e
+  @Get()
+  getAllUsers(): UserDto[] {
+    return this.appService.findAll();
+  }
 
-# test coverage
-$ npm run test:cov
+  @Get('/:index')
+  getOneUser(@Param('index') index: number): UserDto {
+    const users = this.appService.findAll();
+    return users[index];
+  }
+}
+
+
 ```
 
-## Support
+- Even the `1-to-many` relationship.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+In `user.dto.ts`, just add `@Type(() => ArticleDto)` on top of `articles`.
 
-## Stay in touch
+```ts
+import { Expose, Type } from 'class-transformer';
+import 'reflect-metadata';
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+export class UserDto {
+  @Expose()
+  id: number;
 
-## License
+  @Expose()
+  email: string;
 
-  Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+  @Expose()
+  @Type(() => ArticleDto) // adding this
+  articles?: ArticleDto[];
+}
+
+```

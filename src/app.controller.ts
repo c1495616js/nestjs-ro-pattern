@@ -1,8 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import { UserDto } from './dto/user.dto';
 import { Serialize } from './interceptors/serialize.interceptor';
-// import { UserDto } from './dto/user.dto';
 
 @Controller()
 export class AppController {
@@ -14,10 +13,11 @@ export class AppController {
     return this.appService.findAll();
   }
 
-  @Get('/one')
+  @Get('/:index')
   @Serialize(UserDto)
-  getOneUser(): UserDto {
+  getOneUser(@Param('index') index: number): UserDto {
     const users = this.appService.findAll();
-    return users[0];
+    return users[index];
   }
+
 }

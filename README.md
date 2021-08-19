@@ -112,6 +112,27 @@ export class AppController {
 
 ```
 
+#### UserRO, ArticleRO
+
+Adding a file `user.dto.ts` (`UserRO`), with `Expose` decorator from `class-transformer`
+
+For example, I don't want to expose `password`.
+
+```ts
+import { Expose } from 'class-transformer';
+import 'reflect-metadata';
+
+export class UserDto {
+  @Expose()
+  id: number;
+
+  @Expose()
+  email: string;
+}
+
+```
+
+
 - Even the `1-to-many` relationship.
 
 In `user.dto.ts`, just add `@Type(() => ArticleDto)` on top of `articles`.

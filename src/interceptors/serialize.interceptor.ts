@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { plainToClass } from 'class-transformer';
 
+// This means it's a class object
 interface ClassConstructor {
   new (...args: any[]): {};
 }
@@ -24,7 +25,7 @@ export class SerializeInterceptor implements NestInterceptor {
   }
 }
 
-// custom decortor to simplify the longer function name
+// custom decortor to simplify the longer function name aka "UseInterceptors(new SerializeInterceptor"
 export function Serialize(dto: ClassConstructor) {
   return UseInterceptors(new SerializeInterceptor(dto));
 }

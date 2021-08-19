@@ -171,6 +171,8 @@ For example, we don't want to expose user `password` and article `id`.
 
 - Without RO:
 
+![image](https://user-images.githubusercontent.com/31360789/130120104-b7c06396-05c7-446d-aa89-14112aa83f3d.png)
+
 
 For more detail, just check the app. 
 

@@ -53,11 +53,11 @@ class UserService {
 
 ### Solutions
 
-I found by using `class-transformer` and `interceptors` would have more elegant approach.
+I found by using `class-transformer` and `interceptors` would be a more elegant approach.
 
 - No more `map`, and no more `toResponseObject`.
 
-Notice: `user.dto.ts` is equal to `UserRO`, `article.dto.ts` is equal to `ArticleRO`.
+> Notice: `user.dto.ts` is equal to `UserRO`, `article.dto.ts` is equal to `ArticleRO`.
 
 On the `controller` level, we can simply either add `@Serialize(UserDto)` on class level or method level.
 Then everything is working fine as expected.
@@ -72,7 +72,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  @Serialize(UserDto)
+  @Serialize(UserDto) // adding this
   getAllUsers(): UserDto[] {
     return this.appService.findAll();
   }
@@ -93,7 +93,7 @@ import { UserDto } from './dto/user.dto';
 import { Serialize } from './interceptors/serialize.interceptor';
 
 @Controller()
-@Serialize(UserDto)
+@Serialize(UserDto) // adding this
 export class AppController {
   constructor(private readonly appService: AppService) {}
 

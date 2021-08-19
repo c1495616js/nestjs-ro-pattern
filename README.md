@@ -8,7 +8,7 @@
 
 We've been using the RO for longer time,
 
-I'm obeserving 3 things bothering me(as developer is lazy...):
+I'm observing 3 things bothering me(as developer is lazy...):
 - have to write `[key]: this[key]` many times if there are many properties in the `Entity`.
 - need a `map` to iterate `Entity[]` and calling `toResponseObject()`.
 - Furthermore, for `1-to-many` relationship, for example, user has many articles, then need to add `map` in `toResponseObject` too.

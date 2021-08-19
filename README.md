@@ -136,6 +136,8 @@ export class UserDto {
 
 ## Demo
 
+For example, we don't want to expose user `password` and article `id`.
+
 - One User:
 
 ![image](https://user-images.githubusercontent.com/31360789/130118252-57c50ebd-f657-4db5-8130-3893b5e9a11e.png)
@@ -146,4 +148,11 @@ export class UserDto {
 
 ![image](https://user-images.githubusercontent.com/31360789/130118407-afc1d417-e003-4261-8110-5156a981a698.png)
 
+For more detail, just check the app. 
 
+## Run the demo app
+
+```
+npm i
+npm run start:dev
+```

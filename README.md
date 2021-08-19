@@ -133,3 +133,17 @@ export class UserDto {
 }
 
 ```
+
+## Demo
+
+- One User:
+
+![image](https://user-images.githubusercontent.com/31360789/130118252-57c50ebd-f657-4db5-8130-3893b5e9a11e.png)
+
+![image](https://user-images.githubusercontent.com/31360789/130118333-6d91e44b-76d2-4033-a547-085aba844499.png)
+
+- All Users: 
+
+![image](https://user-images.githubusercontent.com/31360789/130118407-afc1d417-e003-4261-8110-5156a981a698.png)
+
+
